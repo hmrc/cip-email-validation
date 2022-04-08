@@ -22,9 +22,10 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
-class HealthEndpointIntegrationSpec
+class ValidateFormatIntegrationSpec
   extends AnyWordSpec
     with Matchers
     with ScalaFutures
@@ -37,17 +38,41 @@ class HealthEndpointIntegrationSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
+      .configure("auditing.enabled" -> false)
       .build()
 
-  "service health endpoint" should {
-    "respond with 200 status" in {
+  "validate-format" should {
+    "respond with 200 status with valid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/ping/ping")
-          .get()
+          .url(s"$baseUrl/email/validate-format")
+          .post(Json.parse {
+            """
+              {
+                "email": "test@test.com"
+              }
+              """.stripMargin
+          })
           .futureValue
 
       response.status shouldBe 200
+    }
+
+    "respond with 400 status with invalid email address" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/email/validate-format")
+          .post(Json.parse {
+            """
+              {
+                "email": "invalid email"
+              }
+              """.stripMargin
+          })
+          .futureValue
+
+      response.status shouldBe 400
+      (response.json \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
     }
   }
 }
