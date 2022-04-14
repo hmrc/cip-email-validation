@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cipemailvalidation.controllers
+package uk.gov.hmrc.cipemailvalidation.model
 
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import play.api.libs.functional.syntax.toApplicativeOps
+import play.api.libs.json.{JsPath, Reads}
 
-@Singleton()
-class MicroserviceHelloWorldController @Inject()(cc: ControllerComponents)
-    extends BackendController(cc) {
+case class EmailAddress(email: String)
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok("Hello world"))
-  }
+object EmailAddress {
+  val MAX_LENGTH = 256
+
+  implicit val locationReads: Reads[EmailAddress] =
+    (JsPath \ "email").read[String](Reads.email.keepAnd(Reads.maxLength[String](MAX_LENGTH))).map(EmailAddress.apply)
 }
