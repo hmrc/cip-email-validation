@@ -45,7 +45,7 @@ class ValidateFormatIntegrationSpec
     "respond with 200 status with valid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/email/validate-format")
+          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
           .post(Json.parse {
             """
               {
@@ -61,7 +61,7 @@ class ValidateFormatIntegrationSpec
     "respond with 400 status with invalid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/email/validate-format")
+          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
           .post(Json.parse {
             """
               {
