@@ -24,6 +24,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
+import play.api.test.Helpers.contentAsJson
 
 class ValidateFormatIntegrationSpec
   extends AnyWordSpec
@@ -45,14 +46,8 @@ class ValidateFormatIntegrationSpec
     "respond with 200 status with valid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/email/validate-format")
-          .post(Json.parse {
-            """
-              {
-                "email": "test@test.com"
-              }
-              """.stripMargin
-          })
+          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
+          .post(Json.parse {"""{"email": "test@test.com"}""".stripMargin})
           .futureValue
 
       response.status shouldBe 200
@@ -61,18 +56,11 @@ class ValidateFormatIntegrationSpec
     "respond with 400 status with invalid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/email/validate-format")
-          .post(Json.parse {
-            """
-              {
-                "email": "invalid email"
-              }
-              """.stripMargin
-          })
+          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
+          .post(Json.parse {"""{"email": "invalid email"}""".stripMargin})
           .futureValue
 
       response.status shouldBe 400
-      (response.json \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
     }
   }
 }
