@@ -46,13 +46,7 @@ class ValidateFormatIntegrationSpec
       val response =
         wsClient
           .url(s"$baseUrl/customer-insight-platform/email/validate-format")
-          .post(Json.parse {
-            """
-              {
-                "email": "test@test.com"
-              }
-              """.stripMargin
-          })
+          .post(Json.parse {"""{"email": "test@test.com"}""".stripMargin})
           .futureValue
 
       response.status shouldBe 200
@@ -62,17 +56,10 @@ class ValidateFormatIntegrationSpec
       val response =
         wsClient
           .url(s"$baseUrl/customer-insight-platform/email/validate-format")
-          .post(Json.parse {
-            """
-              {
-                "email": "invalid email"
-              }
-              """.stripMargin
-          })
+          .post(Json.parse {"""{"email": "invalid email"}""".stripMargin})
           .futureValue
 
       response.status shouldBe 400
-      (response.json \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
     }
   }
 }

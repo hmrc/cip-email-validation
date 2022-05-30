@@ -18,7 +18,7 @@ package uk.gov.hmrc.cipemailvalidation.model
 
 import play.api.libs.json.{Json, OWrites}
 
-case class ErrorResponse(code: String, message: String, details: Option[Map[String, String]] = None)
+case class ErrorResponse(code: String, message: String)
 
 object ErrorResponse {
   implicit val writes: OWrites[ErrorResponse] = Json.writes[ErrorResponse]

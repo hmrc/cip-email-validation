@@ -1,4 +1,4 @@
 #-- Global messages
 
-error.email=Enter a valid email address
-error.maxLength=Enter a valid email address
+# --- Errors
+error.invalid=Enter a valid email address

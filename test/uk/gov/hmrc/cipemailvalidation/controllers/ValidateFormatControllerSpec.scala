@@ -43,7 +43,7 @@ class ValidateFormatControllerSpec extends AnyWordSpec with Matchers with GuiceO
       val result = controller.validateFormat()(
         fakeRequest.withBody(Json.toJson(EmailAddress("invalid.email"))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with email address too long" in {
@@ -54,28 +54,28 @@ class ValidateFormatControllerSpec extends AnyWordSpec with Matchers with GuiceO
       val result = controller.validateFormat()(
         fakeRequest.withBody(Json.toJson(EmailAddress(email))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with email address with spaces" in {
       val result = controller.validateFormat()(
         fakeRequest.withBody(Json.toJson(EmailAddress("invalid email"))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with blank email" in {
       val result = controller.validateFormat()(
         fakeRequest.withBody(Json.toJson(EmailAddress(""))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with blank email with spaces" in {
       val result = controller.validateFormat()(
         fakeRequest.withBody(Json.toJson(EmailAddress(" "))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "details" \ "obj.email").as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
   }
 }

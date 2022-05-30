@@ -36,14 +36,8 @@ class ValidateFormatController @Inject()(cc: ControllerComponents)
   override protected def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
-      case Success(JsError(errs)) =>
-        val details = errs.map {
-          case (jsPath, errors) =>
-            jsPath.toJsonString -> errors.map(err => {
-              cc.messagesApi(err.messages, err.args: _*)(cc.langs.availables.head)
-            }).mkString("; ")
-        }.toMap
-        Future.successful(BadRequest(Json.toJson(ErrorResponse("VALIDATION_ERROR", "Payload validation failed", Some(details)))))
+      case Success(JsError(r)) =>
+        Future.successful(BadRequest(Json.toJson(ErrorResponse("VALIDATION_ERROR", cc.messagesApi("error.invalid")(cc.langs.availables.head)))))
       case Failure(e) =>
         Future.successful(BadRequest(Json.toJson(ErrorResponse("VALIDATION_ERROR", e.getMessage))))
     }
