@@ -24,7 +24,6 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.test.Helpers.contentAsJson
 
 class ValidateFormatIntegrationSpec
   extends AnyWordSpec
