@@ -5,13 +5,14 @@ import sbt._
 
 object AppDependencies {
 
+  val hmrcBootstrapVersion = "7.2.0"
+
   val compile = Seq(
-    "uk.gov.hmrc"             %% "bootstrap-backend-play-28"  % "5.21.0"
+    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % hmrcBootstrapVersion,
   )
 
   val test = Seq(
-    "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "5.21.0"             % "test, it",
-    
-    "com.vladsch.flexmark"    %  "flexmark-all"               % "0.36.8"            % "test, it"
+    "uk.gov.hmrc" %% "bootstrap-test-play-28" % hmrcBootstrapVersion % "test, it",
+    "org.mockito" %% "mockito-scala"          % "1.17.7"             % Test
   )
 }
