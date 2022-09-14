@@ -26,10 +26,10 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
-class ValidateFormatController @Inject()(cc: ControllerComponents)
+class ValidateController @Inject()(cc: ControllerComponents)
   extends BackendController(cc) {
 
-  def validateFormat(): Action[JsValue] = Action(parse.json).async { implicit request =>
+  def validate(): Action[JsValue] = Action(parse.json).async { implicit request =>
     withJsonBody[EmailAddress] { _ => Future.successful(Ok) }
   }
 

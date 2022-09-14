@@ -27,20 +27,20 @@ import uk.gov.hmrc.cipemailvalidation.model.EmailAddress
 
 import scala.util.Random
 
-class ValidateFormatControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class ValidateControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   private val fakeRequest = FakeRequest()
-  private lazy val controller = app.injector.instanceOf[ValidateFormatController]
+  private lazy val controller = app.injector.instanceOf[ValidateController]
   private implicit val writes: OWrites[EmailAddress] = Json.writes[EmailAddress]
 
   "POST /" should {
     "return 200 with valid email address" in {
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress("test@test.com"))))
       status(result) shouldBe OK
     }
 
     "return 400 with email with no @" in {
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress("invalid.email"))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
@@ -51,28 +51,28 @@ class ValidateFormatControllerSpec extends AnyWordSpec with Matchers with GuiceO
       val domain = "test"
       val topLevelDomain = "com"
       val email = s"${local}@${domain}.${topLevelDomain}"
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress(email))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with email address with spaces" in {
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress("invalid email"))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with blank email" in {
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress(""))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
     }
 
     "return 400 with blank email with spaces" in {
-      val result = controller.validateFormat()(
+      val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(EmailAddress(" "))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"

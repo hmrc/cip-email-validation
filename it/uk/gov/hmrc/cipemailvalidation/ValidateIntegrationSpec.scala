@@ -25,7 +25,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
-class ValidateFormatIntegrationSpec
+class ValidateIntegrationSpec
   extends AnyWordSpec
     with Matchers
     with ScalaFutures
@@ -41,11 +41,11 @@ class ValidateFormatIntegrationSpec
       .configure("auditing.enabled" -> false)
       .build()
 
-  "validate-format" should {
+  "validate" should {
     "respond with 200 status with valid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
+          .url(s"$baseUrl/customer-insight-platform/email/validate")
           .post(Json.parse {"""{"email": "test@test.com"}""".stripMargin})
           .futureValue
 
@@ -55,7 +55,7 @@ class ValidateFormatIntegrationSpec
     "respond with 400 status with invalid email address" in {
       val response =
         wsClient
-          .url(s"$baseUrl/customer-insight-platform/email/validate-format")
+          .url(s"$baseUrl/customer-insight-platform/email/validate")
           .post(Json.parse {"""{"email": "invalid email"}""".stripMargin})
           .futureValue
 
