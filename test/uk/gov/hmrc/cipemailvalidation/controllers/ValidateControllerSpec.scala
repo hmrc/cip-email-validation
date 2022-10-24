@@ -23,27 +23,27 @@ import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.{Json, OWrites}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, status}
-import uk.gov.hmrc.cipemailvalidation.model.EmailAddress
+import uk.gov.hmrc.cipemailvalidation.model.Email
 
 import scala.util.Random
 
 class ValidateControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   private val fakeRequest = FakeRequest()
   private lazy val controller = app.injector.instanceOf[ValidateController]
-  private implicit val writes: OWrites[EmailAddress] = Json.writes[EmailAddress]
+  private implicit val writes: OWrites[Email] = Json.writes[Email]
 
   "POST /" should {
     "return 200 with valid email address" in {
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress("test@test.com"))))
+        fakeRequest.withBody(Json.toJson(Email("test@test.com"))))
       status(result) shouldBe OK
     }
 
     "return 400 with email with no @" in {
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress("invalid.email"))))
+        fakeRequest.withBody(Json.toJson(Email("invalid.email"))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with email address too long" in {
@@ -52,30 +52,31 @@ class ValidateControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppP
       val topLevelDomain = "com"
       val email = s"${local}@${domain}.${topLevelDomain}"
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress(email))))
+        fakeRequest.withBody(Json.toJson(Email(email))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with email address with spaces" in {
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress("invalid email"))))
+        fakeRequest.withBody(Json.toJson(Email("invalid email"))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with blank email" in {
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress(""))))
+        fakeRequest.withBody(Json.toJson(Email(""))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with blank email with spaces" in {
       val result = controller.validate()(
-        fakeRequest.withBody(Json.toJson(EmailAddress(" "))))
+        fakeRequest.withBody(Json.toJson(Email(" "))))
       status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email address"
+      (contentAsJson(result) \ "message" ).as[String] shouldBe "Enter a valid email"
     }
   }
 }
+

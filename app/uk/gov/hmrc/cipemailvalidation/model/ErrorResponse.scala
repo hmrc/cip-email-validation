@@ -17,9 +17,20 @@
 package uk.gov.hmrc.cipemailvalidation.model
 
 import play.api.libs.json.{Json, OWrites}
+import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Message.Message
 
-case class ErrorResponse(code: String, message: String)
+case class ErrorResponse(code: Int, message: Message)
 
 object ErrorResponse {
   implicit val writes: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
+
+  object Codes extends Enumeration {
+    type Code = Value
+    val VALIDATION_ERROR          = Value(1002)
+  }
+
+  object Message extends Enumeration {
+    type Message = String
+    val INVALID_EMAIL = "Enter a valid email"
+  }
 }

@@ -19,11 +19,11 @@ package uk.gov.hmrc.cipemailvalidation.model
 import play.api.libs.functional.syntax.toApplicativeOps
 import play.api.libs.json.{JsPath, Reads}
 
-case class EmailAddress(email: String)
+case class Email(email: String)
 
-object EmailAddress {
+object Email {
   val MAX_LENGTH = 256
 
-  implicit val locationReads: Reads[EmailAddress] =
-    (JsPath \ "email").read[String](Reads.email.keepAnd(Reads.maxLength[String](MAX_LENGTH))).map(EmailAddress.apply)
+  implicit val emailReads: Reads[Email] =
+    (JsPath \ "email").read[String](Reads.email.keepAnd(Reads.maxLength[String](MAX_LENGTH))).map(Email.apply)
 }
