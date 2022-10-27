@@ -22,6 +22,7 @@ import play.api.mvc.{Action, ControllerComponents, Request, Result}
 import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Codes.VALIDATION_ERROR
 import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Message.INVALID_EMAIL
 import uk.gov.hmrc.cipemailvalidation.model.{Email, ErrorResponse}
+import uk.gov.hmrc.internalauth.client._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -29,10 +30,15 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
-class ValidateController @Inject()(cc: ControllerComponents)
+class ValidateController @Inject()(cc: ControllerComponents, auth: BackendAuthComponents)
   extends BackendController(cc) with Logging {
 
-  def validate(): Action[JsValue] = Action(parse.json).async { implicit request =>
+  val permission = Predicate.Permission(Resource(
+    ResourceType("cip-email-validation"),
+    ResourceLocation("*")),
+    IAAction("*"))
+
+  def validate(): Action[JsValue] = auth.authorizedAction[Unit](permission).compose(Action(parse.json)).async { implicit request =>
     withJsonBody[Email] { _ => Future.successful(Ok(request.body)) }
   }
 
