@@ -20,10 +20,9 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
+import play.api.libs.ws.ahc.AhcCurlRequestLogger
 
 class ValidateIntegrationSpec
   extends AnyWordSpec
@@ -35,18 +34,16 @@ class ValidateIntegrationSpec
   private val wsClient = app.injector.instanceOf[WSClient]
   private val baseUrl = s"http://localhost:$port"
 
-  override def fakeApplication(): Application =
-    GuiceApplicationBuilder()
-      .configure("metrics.enabled" -> false)
-      .configure("auditing.enabled" -> false)
-      .build()
-
   "validate" should {
     "respond with 200 status with valid email address" in {
       val response =
         wsClient
           .url(s"$baseUrl/customer-insight-platform/email/validate")
-          .post(Json.parse {"""{"email": "test@test.com"}""".stripMargin})
+          .withHttpHeaders(("Authorization", "fake-token"))
+          .withRequestFilter(AhcCurlRequestLogger())
+          .post(Json.parse {
+            """{"email": "test@test.com"}""".stripMargin
+          })
           .futureValue
 
       response.status shouldBe 200
@@ -56,7 +53,11 @@ class ValidateIntegrationSpec
       val response =
         wsClient
           .url(s"$baseUrl/customer-insight-platform/email/validate")
-          .post(Json.parse {"""{"email": "invalid email"}""".stripMargin})
+          .withHttpHeaders(("Authorization", "fake-token"))
+          .withRequestFilter(AhcCurlRequestLogger())
+          .post(Json.parse {
+            """{"email": "invalid email"}""".stripMargin
+          })
           .futureValue
 
       response.status shouldBe 400
