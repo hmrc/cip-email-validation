@@ -49,7 +49,7 @@ For reference here are the details for running each of the services individually
 
 #### Validate
 
-    -XPOST -H "Content-type: application/json" -H "Authorization: fI2zfC5z-xuvDBT7riTHoOssnmqNRJ1IRnBixf8MThPepxTaRoi7pYaTZ9YKG3IP5DdshgpQ5" -d '{
+    -XPOST -H "Content-type: application/json" -d '{
 	    "email": "<email>"
     }' 'https://cip-email-validation.protected.mdtp/customer-insight-platform/email/validate'
 
