@@ -21,6 +21,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.{Json, OWrites}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.cipemailvalidation.model.Email
@@ -37,45 +38,45 @@ class ValidateControllerSpec extends AnyWordSpec
   with IdiomaticMockito {
   "validate" should {
     "return 200 with valid email address" in new SetUp {
-      val result = controller.validate()(
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("test@test.com"))))
       status(result) shouldBe OK
     }
 
     "return 400 with email with no @" in new SetUp {
-      val result = controller.validate()(
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("invalid.email"))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with email address too long" in new SetUp {
-      val local = s"${Random.alphanumeric.take(248).mkString}"
-      val domain = "test"
-      val topLevelDomain = "com"
-      val email = s"${local}@${domain}.${topLevelDomain}"
-      val result = controller.validate()(
+      private val local = s"${Random.alphanumeric.take(248).mkString}"
+      private val domain = "test"
+      private val topLevelDomain = "com"
+      private val email = s"${local}@${domain}.${topLevelDomain}"
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email(email))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with email address with spaces" in new SetUp {
-      val result = controller.validate()(
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("invalid email"))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with blank email" in new SetUp {
-      val result = controller.validate()(
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email(""))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
 
     "return 400 with blank email with spaces" in new SetUp {
-      val result = controller.validate()(
+      private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email(" "))))
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
@@ -83,13 +84,13 @@ class ValidateControllerSpec extends AnyWordSpec
   }
 
   trait SetUp {
-    protected val fakeRequest = FakeRequest().withHeaders("Authorization" -> "fake-token")
-    val expectedPredicate = {
+    protected val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("Authorization" -> "fake-token")
+    private val expectedPredicate = {
       Permission(Resource(ResourceType("cip-email-validation"), ResourceLocation("*")), IAAction("*"))
     }
-    protected val mockStubBehaviour = mock[StubBehaviour]
+    private val mockStubBehaviour = mock[StubBehaviour]
     mockStubBehaviour.stubAuth(Some(expectedPredicate), Retrieval.EmptyRetrieval).returns(Future.unit)
-    protected val backendAuthComponentsStub = BackendAuthComponentsStub(mockStubBehaviour)(Helpers.stubControllerComponents(), Implicits.global)
+    private val backendAuthComponentsStub = BackendAuthComponentsStub(mockStubBehaviour)(Helpers.stubControllerComponents(), Implicits.global)
     protected lazy val controller = new ValidateController(Helpers.stubControllerComponents(), backendAuthComponentsStub)
     protected implicit val writes: OWrites[Email] = Json.writes[Email]
   }
