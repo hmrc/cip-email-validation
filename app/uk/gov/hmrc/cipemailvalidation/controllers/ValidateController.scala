@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
 import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Codes.VALIDATION_ERROR
-import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Message.INVALID_EMAIL
+import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Messages.INVALID_EMAIL
 import uk.gov.hmrc.cipemailvalidation.model.{Email, ErrorResponse}
 import uk.gov.hmrc.internalauth.client._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -33,20 +33,22 @@ import scala.util.{Failure, Success, Try}
 class ValidateController @Inject()(cc: ControllerComponents, auth: BackendAuthComponents)
   extends BackendController(cc) with Logging {
 
-  val permission = Predicate.Permission(Resource(
+  val permission: Predicate.Permission = Predicate.Permission(Resource(
     ResourceType("cip-email-validation"),
     ResourceLocation("*")),
     IAAction("*"))
 
-  def validate(): Action[JsValue] = auth.authorizedAction[Unit](permission).compose(Action(parse.json)).async { implicit request =>
-    withJsonBody[Email] { _ => Future.successful(Ok(request.body)) }
+  def validate(): Action[JsValue] = auth.authorizedAction[Unit](permission).compose(Action(parse.json)).async {
+    implicit request =>
+      withJsonBody[Email] { _ => Future.successful(Ok(request.body)) }
   }
 
-  override protected def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
+  override protected def withJsonBody[T](f: T => Future[Result])
+                                        (implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(_) | Failure(_) =>
-        Future.successful(BadRequest(Json.toJson(ErrorResponse(VALIDATION_ERROR.id, INVALID_EMAIL))))
+        Future.successful(BadRequest(Json.toJson(ErrorResponse(VALIDATION_ERROR, INVALID_EMAIL))))
     }
   }
 }
