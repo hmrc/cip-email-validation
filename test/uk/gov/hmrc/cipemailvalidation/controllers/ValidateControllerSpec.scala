@@ -24,6 +24,7 @@ import play.api.libs.json.{Json, OWrites}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.cipemailvalidation.metrics.MetricsService
 import uk.gov.hmrc.cipemailvalidation.model.Email
 import uk.gov.hmrc.internalauth.client.Predicate.Permission
 import uk.gov.hmrc.internalauth.client._
@@ -40,12 +41,14 @@ class ValidateControllerSpec extends AnyWordSpec
     "return 200 with valid email address" in new SetUp {
       private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("test@test.com"))))
+      mockMetricsService wasNever called
       status(result) shouldBe OK
     }
 
     "return 400 with email with no @" in new SetUp {
       private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("invalid.email"))))
+      mockMetricsService wasNever called
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
@@ -64,6 +67,7 @@ class ValidateControllerSpec extends AnyWordSpec
     "return 400 with email address with spaces" in new SetUp {
       private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email("invalid email"))))
+      mockMetricsService wasNever called
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
@@ -71,6 +75,7 @@ class ValidateControllerSpec extends AnyWordSpec
     "return 400 with blank email" in new SetUp {
       private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email(""))))
+      mockMetricsService.recordMetric("email_validation_failure") was called
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
@@ -78,6 +83,7 @@ class ValidateControllerSpec extends AnyWordSpec
     "return 400 with blank email with spaces" in new SetUp {
       private val result = controller.validate()(
         fakeRequest.withBody(Json.toJson(Email(" "))))
+      mockMetricsService.recordMetric("email_validation_failure") was called
       status(result) shouldBe BAD_REQUEST
       (contentAsJson(result) \ "message").as[String] shouldBe "Enter a valid email"
     }
@@ -89,9 +95,10 @@ class ValidateControllerSpec extends AnyWordSpec
       Permission(Resource(ResourceType("cip-email-validation"), ResourceLocation("*")), IAAction("*"))
     }
     private val mockStubBehaviour = mock[StubBehaviour]
+    val mockMetricsService = mock[MetricsService]
     mockStubBehaviour.stubAuth(Some(expectedPredicate), Retrieval.EmptyRetrieval).returns(Future.unit)
     private val backendAuthComponentsStub = BackendAuthComponentsStub(mockStubBehaviour)(Helpers.stubControllerComponents(), Implicits.global)
-    protected lazy val controller = new ValidateController(Helpers.stubControllerComponents(), backendAuthComponentsStub)
+    protected lazy val controller = new ValidateController(Helpers.stubControllerComponents(), backendAuthComponentsStub, mockMetricsService)
     protected implicit val writes: OWrites[Email] = Json.writes[Email]
   }
 }

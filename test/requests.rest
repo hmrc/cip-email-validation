@@ -1,0 +1,8 @@
+###
+POST http://localhost:6182/customer-insight-platform/email/validate
+content-type: application/json
+Authorization: fI2zfC5z-xuvDBT7riTHoOssnmqNRJ1IRnBixf8MThPepxTaRoi7pYaTZ9YKG3IP5DdshgpQ5
+
+{
+  "email" : "test1@test.com"
+}
