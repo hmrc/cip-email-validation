@@ -19,6 +19,7 @@ package uk.gov.hmrc.cipemailvalidation.controllers
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
+import uk.gov.hmrc.cipemailvalidation.metrics.MetricsService
 import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Codes.VALIDATION_ERROR
 import uk.gov.hmrc.cipemailvalidation.model.ErrorResponse.Messages.INVALID_EMAIL
 import uk.gov.hmrc.cipemailvalidation.model.{Email, ErrorResponse}
@@ -30,7 +31,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton()
-class ValidateController @Inject()(cc: ControllerComponents, auth: BackendAuthComponents)
+class ValidateController @Inject()(cc: ControllerComponents, auth: BackendAuthComponents, metricsService: MetricsService)
   extends BackendController(cc) with Logging {
 
   val permission: Predicate.Permission = Predicate.Permission(Resource(
@@ -48,6 +49,7 @@ class ValidateController @Inject()(cc: ControllerComponents, auth: BackendAuthCo
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(_) | Failure(_) =>
+        metricsService.recordMetric("email_validation_failure")
         Future.successful(BadRequest(Json.toJson(ErrorResponse(VALIDATION_ERROR, INVALID_EMAIL))))
     }
   }
